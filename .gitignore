@@ -1,0 +1,19 @@
+# Rust
+/target
+Cargo.lock
+
+# WebAssembly build output
+/pkg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Node (if using npm for development)
+node_modules/
+

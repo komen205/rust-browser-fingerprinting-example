@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Fingerprint | Rust + WASM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="grid-overlay"></div>
+    <div class="scanline"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="logo-icon">◈</span>
+                <span class="logo-text">FINGERPRINT<span class="accent">.rs</span></span>
+            </div>
+            <div class="tech-badge">
+                <span class="rust-icon">🦀</span> Rust + WebAssembly
+            </div>
+        </header>
+
+        <main>
+            <section class="hero">
+                <h1>Browser Fingerprinting</h1>
+                <p class="subtitle">Unique device identification using Rust compiled to WebAssembly</p>
+                
+                <button id="scan-btn" class="scan-button">
+                    <span class="btn-icon">⬡</span>
+                    <span class="btn-text">Analyze Browser</span>
+                    <div class="btn-glow"></div>
+                </button>
+            </section>
+
+            <section id="results" class="results hidden">
+                <div class="fingerprint-hash">
+                    <div class="hash-label">Your Unique Fingerprint Hash</div>
+                    <div id="hash-value" class="hash-value"></div>
+                    <button id="copy-btn" class="copy-btn" title="Copy to clipboard">
+                        <span>Copy</span>
+                    </button>
+                </div>
+
+                <div class="categories">
+                    <!-- Browser Info -->
+                    <div class="category" data-category="browser">
+                        <div class="category-header">
+                            <span class="category-icon">◉</span>
+                            <h3>Browser Information</h3>
+                        </div>
+                        <div class="category-content">
+                            <div class="data-row">
+                                <span class="label">User Agent</span>
+                                <span id="user-agent" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Language</span>
+                                <span id="language" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Platform</span>
+                                <span id="platform" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Cookies Enabled</span>
+                                <span id="cookies" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Do Not Track</span>
+                                <span id="dnt" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Online Status</span>
+                                <span id="online" class="value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hardware Info -->
+                    <div class="category" data-category="hardware">
+                        <div class="category-header">
+                            <span class="category-icon">◈</span>
+                            <h3>Hardware</h3>
+                        </div>
+                        <div class="category-content">
+                            <div class="data-row">
+                                <span class="label">CPU Cores</span>
+                                <span id="cpu-cores" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Device Memory</span>
+                                <span id="device-memory" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Touch Points</span>
+                                <span id="touch-points" class="value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Screen Info -->
+                    <div class="category" data-category="screen">
+                        <div class="category-header">
+                            <span class="category-icon">▣</span>
+                            <h3>Display</h3>
+                        </div>
+                        <div class="category-content">
+                            <div class="data-row">
+                                <span class="label">Resolution</span>
+                                <span id="resolution" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Available</span>
+                                <span id="avail-resolution" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Color Depth</span>
+                                <span id="color-depth" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Pixel Ratio</span>
+                                <span id="pixel-ratio" class="value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timezone -->
+                    <div class="category" data-category="timezone">
+                        <div class="category-header">
+                            <span class="category-icon">◐</span>
+                            <h3>Timezone</h3>
+                        </div>
+                        <div class="category-content">
+                            <div class="data-row">
+                                <span class="label">Timezone</span>
+                                <span id="timezone" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">UTC Offset</span>
+                                <span id="tz-offset" class="value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Storage -->
+                    <div class="category" data-category="storage">
+                        <div class="category-header">
+                            <span class="category-icon">▤</span>
+                            <h3>Storage Support</h3>
+                        </div>
+                        <div class="category-content">
+                            <div class="data-row">
+                                <span class="label">Local Storage</span>
+                                <span id="local-storage" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Session Storage</span>
+                                <span id="session-storage" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">IndexedDB</span>
+                                <span id="indexed-db" class="value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Canvas -->
+                    <div class="category" data-category="canvas">
+                        <div class="category-header">
+                            <span class="category-icon">◧</span>
+                            <h3>Canvas Fingerprint</h3>
+                        </div>
+                        <div class="category-content">
+                            <div class="data-row full-width">
+                                <span class="label">Hash</span>
+                                <span id="canvas-hash" class="value mono"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WebGL -->
+                    <div class="category wide" data-category="webgl">
+                        <div class="category-header">
+                            <span class="category-icon">◆</span>
+                            <h3>WebGL Information</h3>
+                        </div>
+                        <div class="category-content">
+                            <div class="data-row">
+                                <span class="label">Vendor</span>
+                                <span id="webgl-vendor" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Renderer</span>
+                                <span id="webgl-renderer" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Version</span>
+                                <span id="webgl-version" class="value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="label">Shading Language</span>
+                                <span id="webgl-shading" class="value"></span>
+                            </div>
+                            <div class="data-row full-width">
+                                <span class="label">Extensions</span>
+                                <span id="webgl-extensions" class="value small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Plugins -->
+                    <div class="category" data-category="plugins">
+                        <div class="category-header">
+                            <span class="category-icon">◇</span>
+                            <h3>Plugins</h3>
+                        </div>
+                        <div class="category-content">
+                            <div id="plugins-list" class="list-content"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Raw JSON -->
+                <div class="json-section">
+                    <div class="json-header">
+                        <span>Raw JSON Data</span>
+                        <button id="toggle-json" class="toggle-btn">Show</button>
+                    </div>
+                    <pre id="json-output" class="json-output hidden"></pre>
+                </div>
+            </section>
+
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Analyzing browser characteristics...</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Built with <span class="rust-icon">🦀</span> Rust + WebAssembly</p>
+            <p class="small">This fingerprint is generated locally in your browser. No data is sent to any server.</p>
+        </footer>
+    </div>
+
+    <script type="module" src="index.js"></script>
+</body>
+</html>
+

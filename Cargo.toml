@@ -1,0 +1,68 @@
+[package]
+name = "browser-fingerprint"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name"]
+description = "Browser fingerprinting using Rust and WebAssembly"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies]
+wasm-bindgen = "0.2.93"
+js-sys = "0.3.70"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+hex = "0.4"
+rust_code_obfuscator = "0.2.10"
+cryptify = "3.1.1"
+getrandom = { version = "0.2", features = ["js"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom_03 = { package = "getrandom", version = "0.3", features = ["wasm_js"] }
+
+# The `console_error_panic_hook` crate provides better debugging of panics
+console_error_panic_hook = { version = "0.1.7", optional = true }
+
+[dependencies.web-sys]
+version = "0.3.70"
+features = [
+    "console",
+    "Window",
+    "Navigator",
+    "Document",
+    "Screen",
+    "HtmlCanvasElement",
+    "CanvasRenderingContext2d",
+    "WebGlRenderingContext",
+    "WebGl2RenderingContext",
+    "Performance",
+    "Location",
+    "MimeTypeArray",
+    "MimeType",
+    "PluginArray",
+    "Plugin",
+    "Storage",
+    "MediaDevices",
+    "AudioContext",
+    "BaseAudioContext",
+    "OscillatorNode",
+    "GainNode",
+    "AudioDestinationNode",
+    "OfflineAudioContext",
+    "AnalyserNode",
+    "BiquadFilterNode",
+    "DynamicsCompressorNode",
+]
+
+[dependencies.wasm-bindgen-futures]
+version = "0.4"
+
+[profile.release]
+opt-level = "s"
+lto = true
+
